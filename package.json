@@ -1,0 +1,14 @@
+{
+  "name": "scss-timed-keyframes",
+  "version": "1.0.0",
+  "description": "A sass mixin for easily making animations with specific durations",
+  "scripts": {
+    "compile": "sass ./src/index.scss ./dist/output.css"
+  },
+  "keywords": [],
+  "author": "anty3",
+  "license": "MIT",
+  "dependencies": {
+    "sass": "^1.80.4"
+  }
+}

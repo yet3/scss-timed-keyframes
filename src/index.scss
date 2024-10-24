@@ -1,0 +1,81 @@
+@use 'sass:list';
+@use 'sass:math';
+@use 'sass:meta';
+
+@function percent($total, $value) {
+  @return calc($value / $total) * 100%;
+}
+
+@function is-duration($value, $step_idx, $dur_idx) {
+  $err: "'#{$value}' at index #{$dur_idx} in step #{$step_idx} is not valid duration (must be either 's' or 'ms')";
+
+  @if meta.type-of($value) == 'number' {
+    @if math.unit($value) != 's' and math.unit($value) != 'ms' {
+      @warn $err;
+      @return false;
+    }
+    @return true;
+  } 
+
+  @warn $err;
+  @return false;
+}
+
+@mixin timed_keyframes($name, $items...) {
+  $total_duration: 0ms;
+
+  $amt_of_steps: 0;
+  $steps: ();
+
+  @for $step_idx from 1 through list.length($items) {
+    $item: list.nth($items, $step_idx);
+
+
+    $content_key: list.nth($item, 1);
+    $step_durartions: ();
+    @for $dur_idx from 2 through list.length($item) {
+      $dur: list.nth($item, $dur_idx);
+
+      @if (is-duration($dur, $step_idx, $dur_idx)) {
+        @if $step_idx == 1 and $dur_idx == 2 and calc($dur + 0s) != 0s  {
+          $step_durartions: list.append($step_durartions, 0s);
+        }
+
+        $amt_of_steps: calc($amt_of_steps + 1);
+        $total_duration: calc($total_duration + $dur);
+
+        $step_durartions: list.append($step_durartions, $dur);
+      }
+    }
+    $steps: list.append($steps, ($content_key, $step_durartions));
+  }
+
+  :root {
+    --duration-#{$name}: #{$total_duration};
+  }
+
+  $acc_dur: 0ms;
+  @keyframes #{$name} {
+    @for $step_idx from 1 through list.length($steps) {
+      $step: list.nth($steps, $step_idx);
+      $content_key: list.nth($step, 1);
+      $step_durations: list.nth($step, 2);
+
+      $keyframe: "";
+      @for $dur_idx from 1 through list.length($step_durations) {
+        $dur: list.nth($step_durations, $dur_idx);
+        $acc_dur: calc($acc_dur + $dur);
+
+        $keyframe: "#{$keyframe}#{percent($total_duration, $acc_dur)}";
+
+        @if $dur_idx != list.length($step_durations) {
+          $keyframe: "#{$keyframe}, ";
+        }
+      }
+
+      #{$keyframe} {
+        @content ($content_key);
+      }
+    }
+  }
+}
