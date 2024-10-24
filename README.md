@@ -5,7 +5,7 @@ A [sass](https://sass-lang.com/) mixin for easily making animations with specifi
 ### Usage
 ```scss
 @include timed_keyframes(
-    animated_colors,
+    animated-colors,
     (red 1.5s),
     (blue 1.5s 1.5s),
     (red 0.5s),
